@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Dict, Optional, Any
 from fastapi import FastAPI, Path, Query, HTTPException
 from pydantic import BaseModel, Field
 from starlette import status
@@ -141,5 +141,25 @@ async def delete_book(book_id: int = Path(gt=0)):
 
     if not book_changed:
         raise HTTPException(status_code=404, detail="Item not found")
+    
+
+@app.patch("/books/{book_id}", status_code=status.HTTP_200_OK)
+async def patch_book(book_id:int = Path(gt=0), book_update: Dict[str, Optional[Any]] = None):
+    for i, book in enumerate(BOOKS):
+        if book.id == book_id:
+            if book_update.get("title"):
+                BOOKS[i].title = book_update["title"]
+            if book_update.get("author"):
+                BOOKS[i].author = book_update["author"]
+            if book_update.get("description"):
+                BOOKS[i].description = book_update["description"]
+            if book_update.get("rating"):
+                BOOKS[i].rating = book_update["rating"]
+            if book_update.get("published_date"):
+                BOOKS[i].published_date = book_update["published_date"]
+            return BOOKS[i]
+        
+    raise HTTPException(status_code=404, detail="Item not found")
+
 
 
