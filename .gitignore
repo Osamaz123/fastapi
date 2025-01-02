@@ -1,0 +1,15 @@
+# Virtual environment
+fastapienv/
+
+# Compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Other temporary files
+*.log
+*.env
