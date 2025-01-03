@@ -63,12 +63,22 @@ BOOKS = [
 
 @app.get("/books", status_code=status.HTTP_200_OK)
 async def read_all_books():
+    """Fetches and returns all books from the collection."""
     return BOOKS
 
 
 # path param
 @app.get("/books/{book_id}", status_code=status.HTTP_200_OK)
 async def read_book(book_id: int = Path(gt=0)):
+    """Fetches a book by its ID.
+
+    Args:
+        book_id (int): The ID of the book to fetch.
+
+    Returns:
+        Book: The book matching the provided ID.
+    """
+
     for book in BOOKS:
         if book.id == book_id:
             return book
@@ -79,6 +89,14 @@ async def read_book(book_id: int = Path(gt=0)):
 # query param
 @app.get("/books/", status_code=status.HTTP_200_OK)
 async def read_book_by_rating(book_rating: int = Query(gt=0, lt=6)):
+    """Fetches books with a specific rating.
+
+    Args:
+        book_rating (int): The rating to filter books by.
+
+    Returns:
+        List[Book]: List of books with the specified rating.
+    """
     books_to_read = []
     for book in BOOKS:
         if book.rating == book_rating:
@@ -89,6 +107,14 @@ async def read_book_by_rating(book_rating: int = Query(gt=0, lt=6)):
 
 @app.get("/books/publish/", status_code=status.HTTP_200_OK)
 async def read_books_by_publish_date(published_date:int = Query(gt=1999, lt=2031)):
+    """Fetches books published in a specific year.
+
+    Args:
+        published_date (int): The year to filter books by.
+
+    Returns:
+        List[Book]: List of books published in the specified year.
+    """
     books_to_return = []
     for book in BOOKS:
         if book.published_date == published_date:
@@ -101,6 +127,11 @@ async def read_books_by_publish_date(published_date:int = Query(gt=1999, lt=2031
 
 @app.post("/create-book", status_code=status.HTTP_201_CREATED)
 async def create_book(book_request: BookRequest):
+    """Creates a new book and adds it to the collection.
+
+    Args:
+        book_request (BookRequest): The details of the book to create.
+    """
     new_book = Book(**book_request.model_dump())
     BOOKS.append(find_book_id(new_book))
 
@@ -108,16 +139,19 @@ async def create_book(book_request: BookRequest):
 def find_book_id(book: Book):
     book.id = 1 if len(BOOKS) == 0 else BOOKS[-1].id +1
 
-    # if len(BOOKS) > 0:
-    #     book.id = BOOKS[-1].id +1
-    # else:
-    #     book.id = 1
-    
     return book
 
 
 @app.put("/books/update_book", status_code=status.HTTP_204_NO_CONTENT)
 async def update_book(book: BookRequest):
+    """Updates an existing book's details.
+
+    Args:
+        book (BookRequest): The updated book details.
+
+    Raises:
+        HTTPException: If the book to update is not found.
+    """
     book_changed=False
     for i in range(len(BOOKS)):
         if BOOKS[i].id == book.id:
@@ -132,6 +166,14 @@ async def update_book(book: BookRequest):
 
 @app.delete("/books/{book_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_book(book_id: int = Path(gt=0)):
+    """Deletes a book by its ID.
+
+    Args:
+        book_id (int): The ID of the book to delete.
+
+    Raises:
+        HTTPException: If the book to delete is not found.
+    """
     book_changed=False
     for i in range(len(BOOKS)):
         if BOOKS[i].id == book_id:
@@ -145,6 +187,18 @@ async def delete_book(book_id: int = Path(gt=0)):
 
 @app.patch("/books/{book_id}", status_code=status.HTTP_200_OK)
 async def patch_book(book_id:int = Path(gt=0), book_update: Dict[str, Optional[Any]] = None):
+    """Partially updates a book's details.
+
+    Args:
+        book_id (int): The ID of the book to update.
+        book_update (Dict[str, Optional[Any]]): The fields to update.
+
+    Returns:
+        Book: The updated book.
+
+    Raises:
+        HTTPException: If the book to update is not found.
+    """
     for i, book in enumerate(BOOKS):
         if book.id == book_id:
             if book_update.get("title"):
